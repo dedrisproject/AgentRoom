@@ -17,24 +17,20 @@ import (
 )
 
 const mascot = `
-   ╔═══════════════════════════════════════════════════╗
-   ║                                                   ║
-   ║    █████╗  ██████╗ ███████╗███╗   ██╗████████╗   ║
-   ║   ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝   ║
-   ║   ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║      ║
-   ║   ██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║      ║
-   ║   ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║      ║
-   ║   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝      ║
-   ║                ██████╗  ██████╗  ██████╗ ███╗   ███╗║
-   ║               ██╔══██╗██╔═══██╗██╔═══██╗████╗ ████║║
-   ║               ██████╔╝██║   ██║██║   ██║██╔████╔██║║
-   ║               ██╔══██╗██║   ██║██║   ██║██║╚██╔╝██║║
-   ║               ██║  ██║╚██████╔╝╚██████╔╝██║ ╚═╝ ██║║
-   ║               ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝     ╚═╝║
-   ║                                                   ║
-   ║         Shared inbox for AI coding agents         ║
-   ║                  version %-10s                ║
-   ╚═══════════════════════════════════════════════════╝
+   █████╗  ██████╗ ███████╗███╗   ██╗████████╗
+  ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝
+  ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║
+  ██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║
+  ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║
+  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝
+        ██████╗  ██████╗  ██████╗ ███╗   ███╗
+       ██╔══██╗██╔═══██╗██╔═══██╗████╗ ████║
+       ██████╔╝██║   ██║██║   ██║██╔████╔██║
+       ██╔══██╗██║   ██║██║   ██║██║╚██╔╝██║
+       ██║  ██║╚██████╔╝╚██████╔╝██║ ╚═╝ ██║
+       ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝     ╚═╝
+
+  Shared inbox for AI coding agents · %s
 `
 
 const mascotSmall = `
@@ -206,16 +202,12 @@ func runInit(ver string) {
 
 func printStartHint(cfg config.Config) {
 	fmt.Println()
-	color(colorCyan, "  ┌─ Next steps ───────────────────────────────────────┐")
-	fmt.Println("  │                                                    │")
-	fmt.Printf("  │  Start:  agentroom --config %s\n", padRight(cfg.FilePath+"  │", 38))
-	fmt.Println("  │                                                    │")
-	fmt.Printf("  │  URL:    http://localhost:%s                         │\n", cfg.Port)
-	fmt.Println("  │                                                    │")
-	fmt.Println("  │  Then:   log in → create a room → add an agent    │")
-	fmt.Println("  │                                                    │")
-	fmt.Println("  │  Re-run setup:  agentroom init                     │")
-	fmt.Println("  └────────────────────────────────────────────────────┘")
+	color(colorCyan, "  Next steps")
+	fmt.Println("  ─────────────────────────────────────────────────")
+	fmt.Printf("  Start:         agentroom --config %s\n", cfg.FilePath)
+	fmt.Printf("  URL:           http://localhost:%s\n", cfg.Port)
+	fmt.Println("  Then:          log in → create a room → add an agent")
+	fmt.Println("  Re-run setup:  agentroom init")
 	fmt.Println()
 }
 

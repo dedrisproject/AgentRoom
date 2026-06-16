@@ -171,13 +171,14 @@ func isHTTPS(r *http.Request) bool {
 // ---- Rate limiting ----
 
 type rateLimiter struct {
-	mu      sync.Mutex
-	entries map[string]*rateLimitEntry
+	mu        sync.Mutex
+	entries   map[string]*rateLimitEntry
+	lastSweep time.Time
 }
 
 type rateLimitEntry struct {
-	count    int
-	resetAt  time.Time
+	count   int
+	resetAt time.Time
 }
 
 var loginLimiter = &rateLimiter{
@@ -194,17 +195,34 @@ func CheckLoginRateLimit(ip string) bool {
 	loginLimiter.mu.Lock()
 	defer loginLimiter.mu.Unlock()
 
+	now := time.Now()
+	loginLimiter.sweepExpired(now)
+
 	entry, ok := loginLimiter.entries[ip]
-	if !ok || time.Now().After(entry.resetAt) {
+	if !ok || now.After(entry.resetAt) {
 		loginLimiter.entries[ip] = &rateLimitEntry{
 			count:   1,
-			resetAt: time.Now().Add(loginWindow),
+			resetAt: now.Add(loginWindow),
 		}
 		return true
 	}
 
 	entry.count++
 	return entry.count <= loginMaxAttempts
+}
+
+// sweepExpired drops expired entries so the map cannot grow without bound.
+// Runs at most once per window; caller must hold the lock.
+func (rl *rateLimiter) sweepExpired(now time.Time) {
+	if now.Sub(rl.lastSweep) < loginWindow {
+		return
+	}
+	rl.lastSweep = now
+	for ip, e := range rl.entries {
+		if now.After(e.resetAt) {
+			delete(rl.entries, ip)
+		}
+	}
 }
 
 // ExtractIP extracts the remote IP from a request.

@@ -73,12 +73,13 @@ func (h *agentHandlers) createMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	toAgent := readParam(r, "to_agent")
-	subject := readParam(r, "subject")
-	priority := readParam(r, "priority")
-	body := readParam(r, "message")
+	params := parseRequestBody(r)
+	toAgent := params["to_agent"]
+	subject := params["subject"]
+	priority := params["priority"]
+	body := params["message"]
 	if body == "" {
-		body = readParam(r, "body")
+		body = params["body"]
 	}
 
 	if toAgent == "" {
@@ -143,11 +144,12 @@ func (h *agentHandlers) replyToMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body := readParam(r, "message")
+	params := parseRequestBody(r)
+	body := params["message"]
 	if body == "" {
-		body = readParam(r, "body")
+		body = params["body"]
 	}
-	toAgent := readParam(r, "to_agent")
+	toAgent := params["to_agent"]
 
 	if body == "" {
 		jsonError(w, "message body is required", http.StatusBadRequest)
@@ -218,38 +220,6 @@ func (h *agentHandlers) validateRecipient(roomID int64, toAgent string) error {
 }
 
 // ---- Shared helpers ----
-
-// readParam reads a parameter from JSON body, form body, or query string (in that order).
-func readParam(r *http.Request, key string) string {
-	// Try JSON body first if content-type is JSON.
-	contentType := r.Header.Get("Content-Type")
-	if strings.Contains(contentType, "application/json") {
-		// Body has been (or will be) parsed; try context store if available.
-		// Actually we need to parse JSON body fresh each time — use a different approach.
-		// We parse lazily via the jsonBody function.
-		if val := jsonBodyParam(r, key); val != "" {
-			return val
-		}
-	}
-
-	// Parse form if not already done.
-	r.ParseMultipartForm(1 << 20) // 1MB limit
-
-	if val := r.FormValue(key); val != "" {
-		return val
-	}
-	return r.URL.Query().Get(key)
-}
-
-// jsonBodyParam attempts to parse the request body as JSON and return a string field.
-// We store parsed body in a sync-safe way via context is complex; for simplicity
-// we accept that body may have been consumed. Better: buffer it once.
-// For now, parse form handles both form and query; JSON is handled via ParseJSONBody below.
-func jsonBodyParam(r *http.Request, key string) string {
-	// Body is consumed after first read; rely on ParseForm for form data.
-	// JSON-body parsing is handled by parseRequestBody in handlers that need it.
-	return ""
-}
 
 // parseRequestBody reads JSON or form body into a map.
 func parseRequestBody(r *http.Request) map[string]string {

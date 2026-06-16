@@ -475,11 +475,9 @@ func ReplyToMessage(db *sql.DB, messageID int64, fromAgent, toAgent, body string
 		}
 	}
 
-	subject := "Re: " + root.Subject
-	// Strip nested Re: prefixes if root already had one.
-	if strings.HasPrefix(root.Subject, "Re: ") {
-		subject = root.Subject
-	} else {
+	// Avoid stacking "Re: " prefixes if the root subject already has one.
+	subject := root.Subject
+	if !strings.HasPrefix(root.Subject, "Re: ") {
 		subject = "Re: " + root.Subject
 	}
 
@@ -517,7 +515,7 @@ func CloseThread(db *sql.DB, messageID int64, closedBy string) error {
 // ListGlobalBlockers returns open root messages with priority=blocker across all rooms.
 func ListGlobalBlockers(db *sql.DB) ([]*Message, error) {
 	rows, err := db.Query(`
-		SELECT `+msgCols+`
+		SELECT ` + msgCols + `
 		FROM messages
 		WHERE priority = 'blocker' AND status = 'open' AND parent_id IS NULL
 		ORDER BY created_at DESC`)

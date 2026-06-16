@@ -3,39 +3,39 @@ package i18n
 var translations = map[string]map[string]string{
 	"en": {
 		// Nav
-		"nav.brand":        "AgentRoom",
-		"nav.new_room":     "+ New Room",
-		"nav.sign_out":     "Sign out",
-		"nav.lang_switch":  "🌐",
+		"nav.brand":       "AgentRoom",
+		"nav.new_room":    "+ New Room",
+		"nav.sign_out":    "Sign out",
+		"nav.lang_switch": "🌐",
 
 		// Login
-		"login.title":       "AgentRoom",
-		"login.subtitle":    "Shared inbox for AI coding agents",
-		"login.password":    "Admin password",
-		"login.submit":      "Sign in",
-		"login.error":       "Invalid password",
+		"login.title":    "AgentRoom",
+		"login.subtitle": "Shared inbox for AI coding agents",
+		"login.password": "Admin password",
+		"login.submit":   "Sign in",
+		"login.error":    "Invalid password",
 
 		// Dashboard
-		"dashboard.title":       "Dashboard",
-		"dashboard.blockers":    "Open Blockers",
-		"dashboard.rooms":       "Rooms",
-		"dashboard.new_room":    "+ New Room",
-		"dashboard.no_rooms":    "No rooms yet. Create one to get started.",
-		"dashboard.view_room":   "View Room",
-		"dashboard.delete":      "Delete",
-		"dashboard.agents":      "agents",
-		"dashboard.agent":       "agent",
+		"dashboard.title":          "Dashboard",
+		"dashboard.blockers":       "Open Blockers",
+		"dashboard.rooms":          "Rooms",
+		"dashboard.new_room":       "+ New Room",
+		"dashboard.no_rooms":       "No rooms yet. Create one to get started.",
+		"dashboard.view_room":      "View Room",
+		"dashboard.delete":         "Delete",
+		"dashboard.agents":         "agents",
+		"dashboard.agent":          "agent",
 		"dashboard.blockers_badge": "blockers",
 		"dashboard.blocker_badge":  "blocker",
-		"dashboard.created":     "Created",
-		"dashboard.room":        "Room",
+		"dashboard.created":        "Created",
+		"dashboard.room":           "Room",
 
 		// Create room modal
-		"modal.create_room.title":       "Create Room",
-		"modal.create_room.name_label":  "Room name",
-		"modal.create_room.name_ph":     "e.g. my-project",
-		"modal.create_room.cancel":      "Cancel",
-		"modal.create_room.submit":      "Create Room",
+		"modal.create_room.title":      "Create Room",
+		"modal.create_room.name_label": "Room name",
+		"modal.create_room.name_ph":    "e.g. my-project",
+		"modal.create_room.cancel":     "Cancel",
+		"modal.create_room.submit":     "Create Room",
 
 		// Room view
 		"room.breadcrumb":    "Dashboard",
@@ -111,9 +111,9 @@ var translations = map[string]map[string]string{
 		"modal.reply.submit":  "Send Reply",
 
 		// Confirm dialogs
-		"confirm.delete_room":   "Delete room \"%s\" and all its agents and messages? This cannot be undone.",
-		"confirm.delete_agent":  "Remove agent \"%s\"? They will be deactivated and their token will stop working.",
-		"confirm.close_thread":  "Close this thread? It will be hidden from the default inbox.",
+		"confirm.delete_room":  "Delete room \"%s\" and all its agents and messages? This cannot be undone.",
+		"confirm.delete_agent": "Remove agent \"%s\"? They will be deactivated and their token will stop working.",
+		"confirm.close_thread": "Close this thread? It will be hidden from the default inbox.",
 
 		// Errors
 		"error.network":      "Network error. Please try again.",
@@ -129,10 +129,10 @@ var translations = map[string]map[string]string{
 
 	"it": {
 		// Nav
-		"nav.brand":        "AgentRoom",
-		"nav.new_room":     "+ Nuova Stanza",
-		"nav.sign_out":     "Esci",
-		"nav.lang_switch":  "🌐",
+		"nav.brand":       "AgentRoom",
+		"nav.new_room":    "+ Nuova Stanza",
+		"nav.sign_out":    "Esci",
+		"nav.lang_switch": "🌐",
 
 		// Login
 		"login.title":    "AgentRoom",
@@ -142,26 +142,26 @@ var translations = map[string]map[string]string{
 		"login.error":    "Password non valida",
 
 		// Dashboard
-		"dashboard.title":       "Dashboard",
-		"dashboard.blockers":    "Blocanti aperti",
-		"dashboard.rooms":       "Stanze",
-		"dashboard.new_room":    "+ Nuova Stanza",
-		"dashboard.no_rooms":    "Nessuna stanza. Creane una per iniziare.",
-		"dashboard.view_room":   "Apri Stanza",
-		"dashboard.delete":      "Elimina",
-		"dashboard.agents":      "agenti",
-		"dashboard.agent":       "agente",
+		"dashboard.title":          "Dashboard",
+		"dashboard.blockers":       "Blocanti aperti",
+		"dashboard.rooms":          "Stanze",
+		"dashboard.new_room":       "+ Nuova Stanza",
+		"dashboard.no_rooms":       "Nessuna stanza. Creane una per iniziare.",
+		"dashboard.view_room":      "Apri Stanza",
+		"dashboard.delete":         "Elimina",
+		"dashboard.agents":         "agenti",
+		"dashboard.agent":          "agente",
 		"dashboard.blockers_badge": "bloccanti",
 		"dashboard.blocker_badge":  "bloccante",
-		"dashboard.created":     "Creata",
-		"dashboard.room":        "Stanza",
+		"dashboard.created":        "Creata",
+		"dashboard.room":           "Stanza",
 
 		// Create room modal
-		"modal.create_room.title":       "Crea Stanza",
-		"modal.create_room.name_label":  "Nome stanza",
-		"modal.create_room.name_ph":     "es. mio-progetto",
-		"modal.create_room.cancel":      "Annulla",
-		"modal.create_room.submit":      "Crea Stanza",
+		"modal.create_room.title":      "Crea Stanza",
+		"modal.create_room.name_label": "Nome stanza",
+		"modal.create_room.name_ph":    "es. mio-progetto",
+		"modal.create_room.cancel":     "Annulla",
+		"modal.create_room.submit":     "Crea Stanza",
 
 		// Room view
 		"room.breadcrumb":    "Dashboard",

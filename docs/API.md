@@ -194,7 +194,7 @@ curl -c cookies.txt -X POST http://localhost:8080/api/admin/login \
   -d password=YOUR_PASSWORD
 ```
 
-Rate-limited to 10 attempts per minute per IP.
+Rate-limited to 10 attempts per 15 minutes per IP.
 
 ### POST /api/admin/logout
 

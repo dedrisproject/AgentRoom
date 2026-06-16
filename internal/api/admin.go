@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"github.com/dedrisproject/agentroom/internal/auth"
 	"github.com/dedrisproject/agentroom/internal/db"
@@ -194,7 +193,7 @@ func (h *adminHandlers) createAgent(w http.ResponseWriter, r *http.Request) {
 	baseURL := detectBaseURL(r)
 	md := instructions.Generate(agent, room, baseURL, h.adminName)
 
-	// Strip token from returned agent for safety — actually the spec says include it on create.
+	// The access token is intentionally included on create so the admin can hand it to the agent.
 	w.WriteHeader(http.StatusCreated)
 	jsonSuccess(w, map[string]interface{}{
 		"agent":        agent,
@@ -357,7 +356,6 @@ func (h *adminHandlers) createMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = room
 	w.WriteHeader(http.StatusCreated)
 	jsonSuccess(w, map[string]interface{}{
 		"message": msg,
@@ -449,9 +447,4 @@ func (h *adminHandlers) listBlockers(w http.ResponseWriter, r *http.Request) {
 	jsonSuccess(w, map[string]interface{}{
 		"blockers": blockers,
 	})
-}
-
-// roomIDFromPath parses /api/admin/rooms/{id}/... — kept for readability.
-func roomIDFromPath(r *http.Request) (int64, error) {
-	return strconv.ParseInt(r.PathValue("id"), 10, 64)
 }

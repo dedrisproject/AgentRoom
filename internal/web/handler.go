@@ -35,9 +35,9 @@ type Thread struct {
 
 // pageData is the base data passed to every template.
 type pageData struct {
-	Lang          string
-	T             func(string) string
-	SwitchURL     func(string) string
+	Lang           string
+	T              func(string) string
+	SwitchURL      func(string) string
 	SupportedLangs []string
 }
 
@@ -170,9 +170,9 @@ func (h *Handler) detectLang(r *http.Request) string {
 func (h *Handler) makePageData(r *http.Request) pageData {
 	lang := h.detectLang(r)
 	return pageData{
-		Lang:          lang,
+		Lang:           lang,
 		SupportedLangs: i18n.SupportedLangs,
-		T:             func(key string) string { return i18n.T(lang, key) },
+		T:              func(key string) string { return i18n.T(lang, key) },
 		SwitchURL: func(target string) string {
 			return "/lang?l=" + target + "&back=" + r.URL.Path
 		},
@@ -212,7 +212,7 @@ func (h *Handler) roomView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	room, err := store.GetRoom(h.db, id)
-	if err != nil {
+	if err != nil || room == nil {
 		http.NotFound(w, r)
 		return
 	}
