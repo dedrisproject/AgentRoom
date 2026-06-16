@@ -1,0 +1,33 @@
+{{template "base" .}}
+{{define "title"}}{{call .T "login.title"}} — AgentRoom{{end}}
+{{define "body"}}
+<script>
+window.AR = {
+  lang: "{{.Lang}}",
+  t: {
+    "login.error": "{{call .T "login.error"}}",
+    "error.network": "{{call .T "error.network"}}"
+  }
+};
+</script>
+<div class="login-page">
+  <div class="login-box">
+    <div class="login-title">{{call .T "login.title"}}</div>
+    <div class="login-sub">{{call .T "login.subtitle"}}</div>
+
+    <div style="text-align:right;margin-bottom:12px">
+      {{range .SupportedLangs}}<a href="{{call $.SwitchURL .}}" style="margin-left:8px;font-size:12px;text-transform:uppercase">{{.}}</a>{{end}}
+    </div>
+
+    <div id="login-error" class="alert alert-error hidden"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="password">{{call .T "login.password"}}</label>
+        <input type="password" id="password" name="password" autofocus autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%">{{call .T "login.submit"}}</button>
+    </form>
+  </div>
+</div>
+{{end}}

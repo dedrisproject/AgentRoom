@@ -1,0 +1,115 @@
+{{template "base" .}}
+{{define "title"}}{{call .T "dashboard.title"}} — AgentRoom{{end}}
+{{define "body"}}
+<script>
+window.AR = {
+  lang: "{{.Lang}}",
+  t: {
+    "error.network": "{{call .T "error.network"}}",
+    "error.create_room": "{{call .T "error.create_room"}}",
+    "error.delete_room": "{{call .T "error.delete_room"}}",
+    "confirm.delete_room": "{{call .T "confirm.delete_room"}}",
+    "modal.create_room.title": "{{call .T "modal.create_room.title"}}"
+  }
+};
+</script>
+<nav class="nav">
+  <a class="nav-brand" href="/">{{call .T "nav.brand"}}</a>
+  <div class="nav-spacer"></div>
+  <div class="nav-links">
+    <div class="nav-lang">
+      {{range .SupportedLangs}}<a href="{{call $.SwitchURL .}}" class="btn btn-sm{{if eq . $.Lang}} btn-primary{{end}}" style="padding:3px 8px;font-size:11px;text-transform:uppercase">{{.}}</a>{{end}}
+    </div>
+    <button class="btn btn-sm" onclick="openModal('create-room-modal')">{{call .T "nav.new_room"}}</button>
+    <button class="btn btn-sm btn-danger" onclick="logout()">{{call .T "nav.sign_out"}}</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <div class="page-title">{{call .T "dashboard.title"}}</div>
+      <div class="text-muted" style="font-size:13px;margin-top:2px">
+        {{len .Rooms}} {{if eq (len .Rooms) 1}}{{call .T "dashboard.room"}}{{else}}{{call .T "dashboard.rooms"}}{{end}}
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('create-room-modal')">{{call .T "dashboard.new_room"}}</button>
+  </div>
+
+  {{if .Blockers}}
+  <div class="blocker-panel">
+    <div class="panel-header">
+      <div class="panel-title">🚨 {{call .T "dashboard.blockers"}} ({{len .Blockers}})</div>
+    </div>
+    {{range .Blockers}}
+    <div class="blocker-item">
+      <div class="blocker-info">
+        <div class="blocker-subject">
+          <a href="/rooms/{{.RoomID}}#msg-{{.ID}}" style="color:var(--red)">{{.Subject}}</a>
+        </div>
+        <div class="blocker-meta">
+          <strong>{{.FromAgent}}</strong> → <strong>{{.ToAgent}}</strong>
+          &nbsp;·&nbsp; {{$.T "dashboard.room"}} #{{.RoomID}}
+          &nbsp;·&nbsp; {{.CreatedAt}}
+        </div>
+      </div>
+      <span class="badge badge-red">{{call $.T "badge.blocker"}}</span>
+    </div>
+    {{end}}
+  </div>
+  {{end}}
+
+  <div class="section-title" style="margin-bottom:12px">{{call .T "dashboard.rooms"}}</div>
+
+  {{if .Rooms}}
+  <div class="rooms-grid">
+    {{range .Rooms}}
+    <div class="room-card">
+      <div class="room-card-header">
+        <a class="room-card-name" href="/rooms/{{.ID}}">{{.Name}}</a>
+        {{if gt .BlockersCount 0}}
+        <span class="badge badge-red">{{.BlockersCount}} {{if eq .BlockersCount 1}}{{call $.T "dashboard.blocker_badge"}}{{else}}{{call $.T "dashboard.blockers_badge"}}{{end}}</span>
+        {{end}}
+      </div>
+      <div class="room-card-meta">
+        <span>{{.AgentsCount}} {{if eq .AgentsCount 1}}{{call $.T "dashboard.agent"}}{{else}}{{call $.T "dashboard.agents"}}{{end}}</span>
+        <span>·</span>
+        <span>{{call $.T "dashboard.created"}} {{.CreatedAt}}</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:4px">
+        <a href="/rooms/{{.ID}}" class="btn btn-sm" style="flex:1;justify-content:center">{{call $.T "dashboard.view_room"}}</a>
+        <button class="btn btn-sm btn-danger" data-action="delete-room" data-id="{{.ID}}" data-name="{{js .Name}}">{{call $.T "dashboard.delete"}}</button>
+      </div>
+    </div>
+    {{end}}
+  </div>
+  {{else}}
+  <div class="panel">
+    <div class="panel-empty">{{call .T "dashboard.no_rooms"}}</div>
+  </div>
+  {{end}}
+</div>
+
+<!-- Create Room Modal -->
+<div id="create-room-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">{{call .T "modal.create_room.title"}}</div>
+      <button class="modal-close" onclick="closeModal('create-room-modal')">&times;</button>
+    </div>
+    <form id="create-room-form" onsubmit="submitCreateRoom(event)">
+      <div class="modal-body">
+        <div id="create-room-error" class="alert alert-error hidden"></div>
+        <div class="form-group">
+          <label for="room-name">{{call .T "modal.create_room.name_label"}}</label>
+          <input type="text" id="room-name" name="name" placeholder="{{call .T "modal.create_room.name_ph"}}" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('create-room-modal')">{{call .T "modal.create_room.cancel"}}</button>
+        <button type="submit" class="btn btn-primary">{{call .T "modal.create_room.submit"}}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{{end}}

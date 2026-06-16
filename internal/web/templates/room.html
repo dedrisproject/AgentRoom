@@ -1,0 +1,272 @@
+{{template "base" .}}
+{{define "title"}}{{.Room.Name}} — AgentRoom{{end}}
+{{define "body"}}
+<script>
+const ROOM_ID = {{.Room.ID}};
+window.AR = {
+  lang: "{{.Lang}}",
+  t: {
+    "error.network": "{{call .T "error.network"}}",
+    "error.save_agent": "{{call .T "error.save_agent"}}",
+    "error.delete_agent": "{{call .T "error.delete_agent"}}",
+    "error.delete_room": "{{call .T "error.delete_room"}}",
+    "error.send_message": "{{call .T "error.send_message"}}",
+    "error.send_reply": "{{call .T "error.send_reply"}}",
+    "error.close_thread": "{{call .T "error.close_thread"}}",
+    "error.instructions": "{{call .T "error.instructions"}}",
+    "confirm.delete_agent": "{{call .T "confirm.delete_agent"}}",
+    "confirm.close_thread": "{{call .T "confirm.close_thread"}}",
+    "modal.agent.add_title": "{{call .T "modal.agent.add_title"}}",
+    "modal.agent.edit_title": "{{call .T "modal.agent.edit_title"}}",
+    "modal.agent.add_submit": "{{call .T "modal.agent.add_submit"}}",
+    "modal.agent.edit_submit": "{{call .T "modal.agent.edit_submit"}}",
+    "modal.reply.context": "{{call .T "modal.reply.context"}}",
+    "modal.instructions.copy": "{{call .T "modal.instructions.copy"}}",
+    "modal.instructions.copied": "{{call .T "modal.instructions.copied"}}"
+  }
+};
+</script>
+<nav class="nav">
+  <a class="nav-brand" href="/">AgentRoom</a>
+  <span style="color:var(--border)">/</span>
+  <span style="color:var(--text)">{{.Room.Name}}</span>
+  <div class="nav-spacer"></div>
+  <div class="nav-links">
+    <div class="nav-lang">
+      {{range .SupportedLangs}}<a href="{{call $.SwitchURL .}}" class="btn btn-sm{{if eq . $.Lang}} btn-primary{{end}}" style="padding:3px 8px;font-size:11px;text-transform:uppercase">{{.}}</a>{{end}}
+    </div>
+    <button class="btn btn-sm btn-danger" onclick="logout()">{{call .T "nav.sign_out"}}</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="breadcrumb"><a href="/">{{call .T "room.breadcrumb"}}</a> / {{.Room.Name}}</div>
+
+  <!-- Agents -->
+  <div class="page-header" style="margin-top:16px">
+    <div class="section-title">{{call .T "room.agents"}}</div>
+    <button class="btn btn-primary btn-sm" onclick="openAddAgentModal()">{{call .T "room.add_agent"}}</button>
+  </div>
+
+  <div class="panel" style="margin-bottom:24px">
+    {{if .Agents}}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{call .T "room.name"}}</th>
+            <th>{{call .T "room.role"}}</th>
+            <th>{{call .T "room.repo"}}</th>
+            <th>{{call .T "room.created"}}</th>
+            <th>{{call .T "room.actions"}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Agents}}
+          <tr>
+            <td><span class="mono">{{.Name}}</span></td>
+            <td>{{if .Role}}{{.Role}}{{else}}<span class="text-muted">—</span>{{end}}</td>
+            <td>{{if .Repo}}<a href="{{.Repo}}" target="_blank" rel="noopener">{{.Repo}}</a>{{else}}<span class="text-muted">—</span>{{end}}</td>
+            <td class="text-muted">{{.CreatedAt}}</td>
+            <td>
+              <div class="td-actions">
+                <button class="btn btn-sm" data-action="edit-agent" data-id="{{.ID}}" data-name="{{js .Name}}" data-role="{{js .Role}}" data-repo="{{js .Repo}}">{{call $.T "room.edit"}}</button>
+                <button class="btn btn-sm" data-action="view-instructions" data-id="{{.ID}}">{{call $.T "room.instructions"}}</button>
+                <button class="btn btn-sm btn-danger" data-action="delete-agent" data-id="{{.ID}}" data-name="{{js .Name}}">{{call $.T "room.delete"}}</button>
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <div class="panel-empty">{{call .T "room.no_agents"}}</div>
+    {{end}}
+  </div>
+
+  <hr class="divider">
+
+  <!-- Conversation -->
+  <div class="page-header">
+    <div class="section-title">{{call .T "room.conversation"}}</div>
+    <button class="btn btn-primary btn-sm" onclick="openNewMessageModal()">{{call .T "room.new_message"}}</button>
+  </div>
+
+  <div id="threads-container">
+  {{if .Threads}}
+    {{range .Threads}}
+    {{$root := .Root}}
+    <div class="thread {{if eq $root.Priority "blocker"}}thread-blocker{{end}} {{if eq $root.Status "closed"}}thread-closed{{end}}" id="msg-{{$root.ID}}">
+      <div class="thread-root">
+        <div class="thread-header">
+          <div class="thread-subject">{{$root.Subject}}</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            {{if eq $root.Priority "blocker"}}<span class="badge badge-red">{{call $.T "badge.blocker"}}</span>{{end}}
+            {{if eq $root.Status "open"}}<span class="badge badge-green">{{call $.T "badge.open"}}</span>{{else}}<span class="badge badge-gray">{{call $.T "badge.closed"}}</span>{{end}}
+          </div>
+        </div>
+        <div class="thread-meta">
+          <strong>{{$root.FromAgent}}</strong> → <strong>{{$root.ToAgent}}</strong>
+          &nbsp;·&nbsp; {{$root.CreatedAt}}
+        </div>
+        <div class="thread-body">{{$root.Body}}</div>
+        {{if eq $root.Status "open"}}
+        <div class="thread-actions">
+          <button class="btn btn-sm" data-action="open-reply" data-id="{{$root.ID}}" data-subject="{{js $root.Subject}}">{{call $.T "room.reply"}}</button>
+          <button class="btn btn-sm btn-danger" data-action="close-thread" data-id="{{$root.ID}}">{{call $.T "room.close_thread"}}</button>
+        </div>
+        {{else}}
+        <div class="thread-meta" style="margin-top:6px">
+          {{call $.T "room.closed_by"}}{{if $root.ClosedBy}} {{call $.T "room.closed_by_who"}} <strong>{{$root.ClosedBy}}</strong>{{end}}{{if $root.ClosedAt}} · {{$root.ClosedAt}}{{end}}
+        </div>
+        {{end}}
+      </div>
+      {{range .Replies}}
+      <div class="reply">
+        <div class="reply-header">
+          <strong>{{.FromAgent}}</strong>
+          <span class="text-muted">→</span>
+          <strong>{{.ToAgent}}</strong>
+          <span class="text-muted" style="margin-left:auto;font-size:12px">{{.CreatedAt}}</span>
+          {{if eq .Priority "blocker"}}<span class="badge badge-red" style="margin-left:4px">{{call $.T "badge.blocker"}}</span>{{end}}
+        </div>
+        <div class="reply-body">{{.Body}}</div>
+      </div>
+      {{end}}
+    </div>
+    {{end}}
+  {{else}}
+    <div class="panel">
+      <div class="panel-empty">{{call .T "room.no_messages"}}</div>
+    </div>
+  {{end}}
+  </div>
+</div>
+
+<!-- Add/Edit Agent Modal -->
+<div id="add-agent-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="add-agent-modal-title">{{call .T "modal.agent.add_title"}}</div>
+      <button class="modal-close" onclick="closeModal('add-agent-modal')">&times;</button>
+    </div>
+    <form id="add-agent-form" onsubmit="submitAgent(event)">
+      <input type="hidden" id="agent-id" value="">
+      <div class="modal-body">
+        <div id="add-agent-error" class="alert alert-error hidden"></div>
+        <div class="form-group">
+          <label for="agent-name">{{call .T "modal.agent.name_label"}} <span class="text-red">{{call .T "modal.agent.name_req"}}</span></label>
+          <input type="text" id="agent-name" name="name" placeholder="{{call .T "modal.agent.name_ph"}}" required>
+          <div class="form-hint">{{call .T "modal.agent.name_hint"}}</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="agent-role">{{call .T "modal.agent.role_label"}}</label>
+            <input type="text" id="agent-role" name="role" placeholder="{{call .T "modal.agent.role_ph"}}" list="known-roles">
+            <datalist id="known-roles">{{range .KnownRoles}}<option value="{{.}}">{{end}}</datalist>
+          </div>
+          <div class="form-group">
+            <label for="agent-repo">{{call .T "modal.agent.repo_label"}}</label>
+            <input type="text" id="agent-repo" name="repo" placeholder="{{call .T "modal.agent.repo_ph"}}" list="known-repos">
+            <datalist id="known-repos">{{range .KnownRepos}}<option value="{{.}}">{{end}}</datalist>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('add-agent-modal')">{{call .T "modal.agent.cancel"}}</button>
+        <button type="submit" class="btn btn-primary" id="add-agent-submit">{{call .T "modal.agent.add_submit"}}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Instructions Modal -->
+<div id="instructions-modal" class="modal-overlay">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title">{{call .T "modal.instructions.title"}}</div>
+      <button class="modal-close" onclick="closeModal('instructions-modal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted" style="margin-bottom:12px;font-size:13px">{{call .T "modal.instructions.subtitle"}}</p>
+      <textarea id="instructions-text" class="instructions-textarea" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn" onclick="closeModal('instructions-modal')">{{call .T "modal.instructions.close"}}</button>
+      <button type="button" class="btn" onclick="downloadInstructions()">{{call .T "modal.instructions.download"}}</button>
+      <button type="button" class="btn btn-primary" id="copy-instructions-btn" onclick="copyInstructions()">{{call .T "modal.instructions.copy"}}</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Message Modal -->
+<div id="new-message-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">{{call .T "modal.message.title"}}</div>
+      <button class="modal-close" onclick="closeModal('new-message-modal')">&times;</button>
+    </div>
+    <form id="new-message-form" onsubmit="submitNewMessage(event)">
+      <div class="modal-body">
+        <div id="new-message-error" class="alert alert-error hidden"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="msg-to">{{call .T "modal.message.to"}} <span class="text-red">*</span></label>
+            <select id="msg-to" name="to_agent" required>
+              <option value="">{{call .T "modal.message.to_ph"}}</option>
+              <option value="all">{{call .T "modal.message.all"}}</option>
+              <option value="{{.AdminName}}">{{.AdminName}} {{call .T "modal.message.admin"}}</option>
+              {{range .Agents}}<option value="{{.Name}}">{{.Name}}</option>{{end}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="msg-priority">{{call .T "modal.message.priority"}}</label>
+            <select id="msg-priority" name="priority">
+              <option value="normal">{{call .T "modal.message.normal"}}</option>
+              <option value="blocker">{{call .T "modal.message.blocker"}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="msg-subject">{{call .T "modal.message.subject"}}</label>
+          <input type="text" id="msg-subject" name="subject" placeholder="{{call .T "modal.message.subject_ph"}}">
+        </div>
+        <div class="form-group">
+          <label for="msg-body">{{call .T "modal.message.body"}} <span class="text-red">*</span></label>
+          <textarea id="msg-body" name="message" rows="5" required placeholder="{{call .T "modal.message.body_ph"}}"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('new-message-modal')">{{call .T "modal.message.cancel"}}</button>
+        <button type="submit" class="btn btn-primary">{{call .T "modal.message.submit"}}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reply Modal -->
+<div id="reply-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">{{call .T "modal.reply.title"}}</div>
+      <button class="modal-close" onclick="closeModal('reply-modal')">&times;</button>
+    </div>
+    <form id="reply-form" onsubmit="submitReply(event)">
+      <input type="hidden" id="reply-message-id" value="">
+      <div class="modal-body">
+        <div id="reply-context" class="text-muted" style="font-size:13px;margin-bottom:12px"></div>
+        <div id="reply-error" class="alert alert-error hidden"></div>
+        <div class="form-group">
+          <label for="reply-body">{{call .T "modal.reply.body"}} <span class="text-red">*</span></label>
+          <textarea id="reply-body" name="message" rows="5" required placeholder="{{call .T "modal.reply.body_ph"}}"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('reply-modal')">{{call .T "modal.reply.cancel"}}</button>
+        <button type="submit" class="btn btn-primary">{{call .T "modal.reply.submit"}}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{{end}}

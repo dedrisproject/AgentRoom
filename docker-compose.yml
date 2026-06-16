@@ -1,0 +1,17 @@
+services:
+  agentroom:
+    image: ghcr.io/dedrisproject/agentroom:latest
+    # Or build locally:
+    # build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - agentroom-data:/data
+    environment:
+      AGENTROOM_DB: /data/agentroom.db
+      # AGENTROOM_ADMIN_PASSWORD: your-password  # omit to auto-generate
+      # AGENTROOM_BASE_URL: https://agentroom.example.com
+    restart: unless-stopped
+
+volumes:
+  agentroom-data:
