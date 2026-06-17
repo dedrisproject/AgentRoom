@@ -16,18 +16,20 @@ import (
 	"golang.org/x/term"
 )
 
-const mascot = `
+const mascotRobot = `
                       ✦
                       │
-                    ╭─┴─╮
-                    │● ●│
-                    │ ◡ │
-                    ╰─┬─╯
                    ╭──┴──╮
-                   │◇ ◇ ◇│
-                   ╰─┬─┬─╯
-                     ╹ ╹
+                   │◉   ◉│
+                   │  ◡  │
+                  ╭┴─────┴╮
+                ◀─┤▒▒▒▒▒▒▒├─▶
+                  │▒░░░░░▒│
+                  ╰─┬───┬─╯
+                    ╵   ╵
+`
 
+const mascotLogo = `
    █████╗  ██████╗ ███████╗███╗   ██╗████████╗
   ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝
   ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║
@@ -40,23 +42,30 @@ const mascot = `
        ██╔══██╗██║   ██║██║   ██║██║╚██╔╝██║
        ██║  ██║╚██████╔╝╚██████╔╝██║ ╚═╝ ██║
        ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝     ╚═╝
-
-  Shared inbox for AI coding agents · %s
 `
 
+const mascotTagline = "Shared inbox for AI coding agents"
+
 const mascotSmall = `
-   [●‿●]   AgentRoom %s
+   [◉‿◉]   AgentRoom %s
            Shared inbox for AI coding agents
 `
 
+// printBanner renders the startup banner: a colored robot mascot + wordmark on a
+// TTY, or a compact single-line variant when output is piped (non-TTY).
+func printBanner(ver string) {
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Printf(mascotSmall, ver)
+		return
+	}
+	fmt.Print(colorCyan + mascotRobot + colorReset)
+	fmt.Print(colorWhite + mascotLogo + colorReset)
+	fmt.Printf("\n  %s%s%s \u00b7 %s\n", colorCyan, mascotTagline, colorReset, ver)
+}
+
 // runInit runs the interactive setup wizard.
 func runInit(ver string) {
-	// Print mascot
-	if term.IsTerminal(int(os.Stdout.Fd())) {
-		fmt.Printf(mascot, ver)
-	} else {
-		fmt.Printf(mascotSmall, ver)
-	}
+	printBanner(ver)
 
 	cfgPath := config.DefaultConfigPath()
 	cfg := config.Defaults()
