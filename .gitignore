@@ -1,0 +1,14 @@
+# Build output (root binary only — keep cmd/agentroom/ source)
+/dist/
+/agentroom
+/agentroom.exe
+
+# Local data / config
+*.db
+*.db-wal
+*.db-shm
+*.conf
+
+# OS / editor cruft
+.DS_Store
+*.swp

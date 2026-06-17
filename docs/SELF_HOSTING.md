@@ -123,17 +123,23 @@ server {
 
 ## Backup & Restore
 
-AgentRoom's entire state is in a single SQLite file.
+AgentRoom's entire state is in a single SQLite file. Because the database runs
+in **WAL mode**, do not plain-`cp` the `.db` file while the service is running —
+you may capture an inconsistent state (recent writes live in the `-wal` file).
+Use SQLite's online backup, which produces a consistent snapshot safely:
 
 ```bash
-# Backup
-cp /var/lib/agentroom/agentroom.db /backup/agentroom-$(date +%Y%m%d).db
+# Backup (consistent, while the service is running)
+sqlite3 /var/lib/agentroom/agentroom.db ".backup '/backup/agentroom-$(date +%Y%m%d).db'"
 
 # Restore
 systemctl stop agentroom
 cp /backup/agentroom-20260617.db /var/lib/agentroom/agentroom.db
 systemctl start agentroom
 ```
+
+> If `sqlite3` is not installed, stop the service first, then `cp` the `.db`
+> file (plus any `-wal`/`-shm` files), and start it again.
 
 ## Upgrading
 

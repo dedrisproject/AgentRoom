@@ -75,10 +75,13 @@ func NewRouter(database *sql.DB, authCfg auth.Config, adminName string, ui WebRe
 	// ---- Top-level dispatcher ----
 	// Avoids Go 1.22 pattern conflicts by dispatching based on path prefix
 	// rather than registering overlapping patterns on the same mux.
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	dispatcher := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 
 		switch {
+		case path == "/healthz":
+			healthz(w, r, database)
+
 		case path == "/api/admin/login" || path == "/api/admin/logout":
 			unauthMux.ServeHTTP(w, r)
 
@@ -103,4 +106,6 @@ func NewRouter(database *sql.DB, authCfg auth.Config, adminName string, ui WebRe
 			}
 		}
 	})
+
+	return withMiddleware(dispatcher)
 }

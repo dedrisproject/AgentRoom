@@ -171,3 +171,29 @@ func TestAdminRequiresSession(t *testing.T) {
 		t.Fatalf("expected 401 without a session, got %d", rec.Code)
 	}
 }
+
+func TestHealthz(t *testing.T) {
+	_, handler := newTestServer(t)
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 from /healthz, got %d", rec.Code)
+	}
+	if rec.Body.String() != "ok" {
+		t.Fatalf("expected body 'ok', got %q", rec.Body.String())
+	}
+}
+
+func TestSecurityHeaders(t *testing.T) {
+	_, handler := newTestServer(t)
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if got := rec.Header().Get("X-Content-Type-Options"); got != "nosniff" {
+		t.Fatalf("expected nosniff, got %q", got)
+	}
+	if got := rec.Header().Get("X-Frame-Options"); got != "DENY" {
+		t.Fatalf("expected DENY, got %q", got)
+	}
+}
